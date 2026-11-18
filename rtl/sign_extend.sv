@@ -2,12 +2,12 @@ module sign_extend #(
     localparam [2:0] imm_I = 0, imm_U = 4, imm_S = 1, imm_B = 2, imm_J = 3;
 )(
     input logic [31:0]      instr,
-    input logic [2:0]       immsrc,
+    input logic [2:0]       imm_src,
     output logic[31:0]      ext_im
 );
 
 always_comb begin
-    case (immsrc)
+    case (imm_src)
         imm_I: ext_im = {{20{instr[31]}}, instr[31:20]};
         imm_B: ext_im = {{20{instr[31]}}, instr[7], instr[30:25], instr[11:8], 1'b0};
         imm_S: ext_im = {{20{instr[31]}}, instr[31:25], instr[11:7]};
