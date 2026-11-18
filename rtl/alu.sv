@@ -1,32 +1,42 @@
-module alu(
+module alu (
+    input  logic        alu_src,
     input  logic [31:0] alu_op1, alu_op2,
-    input  logic [1:0]  alu_ctrl,
-    input  logic [2:0]  func_3,
-    input  logic [1:0]  op5_func75,
+    input  logic [2:0]  alu_control,
+    input  logic [6:0]  func7,
     output logic [31:0] alu_out,
-    output logic        equal
+    output logic        zero
 );
 
-
-    always_comb begin
-        case(alu_ctrl)
-            0: alu_out = alu_op1 + alu_op2;
-            1: alu_out = alu_op1 - alu_op2;
-            2: begin
-                case (func_3)
-                    3'b000: if(op5_func75 == 2'b11)
-                                alu_out = alu_op1 - alu_op2;
-                            else
-                                alu_out = alu_op1 + alu_op2;
-                    3'b010: alu_out = {31'b0, (alu_op1 < alu_op2) ? 1:0};
-                    3'b110: alu_out = alu_op1 | alu_op2;
-                    3'b111: alu_out = alu_op1 & alu_op2;
+always_comb begin
+    case (alu_control)
+        0:  begin
+            if (alu_src) begin // imm-reg
+                alu_out = alu_op1 + alu_op2; // ADDI
+            end else begin // reg-reg
+                case (func7)
+                   7'h0:    alu_out = alu_op1 + alu_op2; // ADD
+                   7'h20:   alu_out = alu_op1 - alu_op2; // SUB
+                   default: alu_out = 32'b0;
                 endcase
             end
-            default: alu_out = '0;
-        endcase
-    end
-
+        end
+        1:  alu_out = alu_op1 << alu_op2[4:0]; // SLL
+        2:  alu_out = ($signed(alu_op1) < $signed(alu_op2)) ? 32'b1 : 32'b0; // SLT
+        3:  alu_out = (alu_op1 < alu_op2) ? 32'b1 : 32'b0; // SLTU
+        4:  alu_out = alu_op1 ^ alu_op2; // XOR
+        5:  begin
+            case (func7)
+                7'h0:    alu_out = alu_op1 >> alu_op2[4:0]; // SRL
+                7'h20:   alu_out = $signed(alu_op1) >>> alu_op2[4:0]; // SRA
+                default: alu_out = 32'b0;
+            endcase
+        end
+        6:  alu_out = alu_op1 | alu_op2; // OR
+        7:  alu_out = alu_op1 & alu_op2; // AND
+        default: alu_out = 32'b0;
+    endcase
+    zero = (alu_out == 32'b0);
+end
 
 endmodule
 
