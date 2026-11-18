@@ -1,6 +1,8 @@
 module alu (
     input  logic        alu_src,
-    input  logic [31:0] alu_op1, alu_op2,
+    input  logic        branch,
+    input  logic [31:0] alu_op1,
+    input  logic [31:0] alu_op2,
     input  logic [2:0]  alu_control,
     input  logic [6:0]  func7,
     output logic [31:0] alu_out,
@@ -9,8 +11,10 @@ module alu (
 
 always_comb begin
     case (alu_control)
-        0:  begin
-            if (alu_src) begin // imm-reg
+        0:  begin // ADD/SUB
+            if (branch) begin // branch instructions must always subtract
+                alu_out = alu_op1 - alu_op2
+            end else if (alu_src) begin // imm-reg
                 alu_out = alu_op1 + alu_op2; // ADDI
             end else begin // reg-reg
                 case (func7)

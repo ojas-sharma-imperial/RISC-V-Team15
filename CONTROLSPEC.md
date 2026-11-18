@@ -14,7 +14,7 @@ This document outlines the control logic specifications, so that other hardware 
 
 ### `result_src`
 
-`result_src[0]`: set to 0 in common-case, allowing ALU-processed data to be written back into the regfile. It is set to 1 during memory load operations, allowing data read from memory to be put into the regfile.
+`result_src[1:0]`: set to 0 in common-case, allowing ALU-processed data to be written back into the regfile. It is set to 1 during memory load operations, allowing data read from memory to be put into the regfile. It is set to 2 when the program counter is to be stored into the regfile.
 
 ## Sign-Extensions
 
@@ -29,6 +29,7 @@ isbjur
 | J | 3 | Sign extension from 20-bit, discarding LSB |
 | U | 4 | Shift 20-bit left and fill least-significant 12-bits with 0 |
 | R | 5 | No sign extension as from register, index 5 used elsewhere |
+| SYS | 6 | I-style instruction encoding with no sign extension |
 
 ## Write-Enable Signals
 
