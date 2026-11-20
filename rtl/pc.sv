@@ -1,5 +1,4 @@
 module pc(
-    input logic [31:0] pc_current,
     input logic clk, rst, pc_src,
     input logic [31:0] imm_op,
     output logic [31:0] pc_output);
@@ -7,11 +6,9 @@ module pc(
     logic [31:0] pc_branch;
     logic [31:0] pc_next;
 
-    assign pc_current = pc_output;
-
     always_comb begin : PC_operations
-        pc_inc = pc_current + 4;
-        pc_branch = pc_current + imm_op;       
+        pc_inc = pc_output + 4;
+        pc_branch = pc_output + imm_op;       
     end
 
     mux pc_select  (.in1(pc_branch),
