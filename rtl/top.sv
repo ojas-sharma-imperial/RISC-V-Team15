@@ -19,14 +19,14 @@ logic [31:0] pc_offset;
 
 always_comb begin
     target_instruction = pc + pc_offset;
-    next_instruction = pc + 32'd4;
+    pc_plus4 = pc + 32'd4;
 end
 
 always_ff @(posedge clk, posedge rst) begin
     if (rst) begin
         pc <= BOOT_VECTOR;
     end else begin
-        pc <= (pc_src) ? target_instruction : next_instruction;
+        pc <= (pc_src) ? target_instruction : pc_plus4;
     end
 end
 
@@ -36,7 +36,7 @@ alu alu_inst (
     .alu_op1 (),
     .alu_op2 (),
     .alu_control (),
-    .func7 (),
+    .funct7 (),
     .alu_out (),
     .zero ()
 );

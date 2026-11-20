@@ -5,7 +5,8 @@ module control (
     input logic         zero,
     output logic        pc_src,
     output logic [1:0]  result_src,
-    output logic        alu_src,
+    output logic [1:0]  alu_src_1,
+    output logic        alu_src_2,
     output logic [2:0]  imm_src,
     output logic [2:0]  alu_control,
     output logic        mem_wen,
@@ -46,8 +47,8 @@ localparam [2:0] SLT = 2;
 localparam [2:0] SLTU = 3;
 localparam [2:0] XOR = 4;
 localparam [2:0] SRL_SRA = 5;
-localparam [2:0] SYS = 6;
-localparam [2:0] INVALID = 7;
+localparam [2:0] SYS_INSTR = 6;
+localparam [2:0] INVALID_INSTR = 7;
 
 always_comb begin
 
@@ -55,7 +56,8 @@ always_comb begin
 
     pc_src = 1'b0;
     result_src = 2'b00;
-    alu_src = 1'b0;
+    alu_src_1 = 2'b0;
+    alu_src_2 = 1'b0;
     imm_src = INVALID;
     alu_control = 3'b0;
     mem_wen = 1'b0;
@@ -65,10 +67,19 @@ always_comb begin
     case (instruction)
         LUI: begin
             imm_src = U;
-            reg_wen = 1'b1; // HEEEEEEEEELLLP
+            pc_src = 1'b1;
+            reg_wen = 1'b1;
+            alu_src_1 = 2'b10;
+            alu_src_2 = 1'b1;
+            alu_control = ADD_SUB;
         end
         AUIPC: begin
             imm_src = U;
+            pc_src = 1'b1;
+            reg_wen = 1'b1;
+            alu_src_1 = 2'b01;
+            alu_src_2 = 1'b1;
+            alu_control = ADD_SUB;
         end
         JAL: begin
             imm_src = J;
@@ -109,7 +120,7 @@ always_comb begin
                     pc_src = zero;
                 end
                 default:    begin // defualt subtraction (shouldn't reach this)
-                    alu_control = ADD_SUB;
+                    alu_control = INVALID_INSTR;
                 end
             endcase
         end
@@ -117,17 +128,17 @@ always_comb begin
             imm_src = I;
             reg_wen = 1'b1;
             result_src = 2'b01;
-            alu_src = 1'b1;
+            alu_src_2 = 1'b1;
         end
         STORE_MEM: begin
             imm_src = S;
             mem_wen = 1'b1;
-            alu_src = 1'b1;
+            alu_src_2 = 1'b1;
         end
         ALU_IMM: begin
             imm_src = I;
             reg_wen = 1'b1;
-            alu_src = 1'b1;
+            alu_src_2 = 1'b1;
             alu_control = funct3;
         end
         ALU_REG: begin
