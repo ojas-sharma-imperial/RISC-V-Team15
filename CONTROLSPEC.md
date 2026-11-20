@@ -4,9 +4,13 @@ This document outlines the control logic specifications, so that other hardware 
 
 ## MUX Source Signals
 
-### `alu_src`
+### `alu_src_1`
 
-`alu_src[0]`: set to 0 when the ALU is using a register value from port 2 as `alu_op2` and set to 1 when an immediate value is used.
+`alu_src_1[1:0]`: set to 0 when the ALU is using a register value from port 1 and set to 1 when the program counter value is used. It is set to 2 when the constant `32'b0` is loaded. It is undefined when set to 3.
+
+### `alu_src_2`
+
+`alu_src_2[0]`: set to 0 when the ALU is using a register value from port 2 as `alu_op2` and set to 1 when an immediate value is used.
 
 ### `pc_src`
 
@@ -14,7 +18,7 @@ This document outlines the control logic specifications, so that other hardware 
 
 ### `result_src`
 
-`result_src[1:0]`: set to 0 in common-case, allowing ALU-processed data to be written back into the regfile. It is set to 1 during memory load operations, allowing data read from memory to be put into the regfile. It is set to 2 when the program counter is to be stored into the regfile.
+`result_src[1:0]`: set to 0 in common-case, allowing ALU-processed data to be written back into the regfile. It is set to 1 during memory load operations, allowing data read from memory to be put into the regfile. It is set to 2 when the program counter is to be stored into the regfile. It is undefined when set to 3.
 
 ## Sign-Extensions
 
@@ -30,7 +34,12 @@ isbjur
 | U | 4 | Shift 20-bit left and fill least-significant 12-bits with 0 |
 | R | 5 | No sign extension as from register, index 5 used elsewhere |
 | SYS | 6 | I-style instruction encoding with no sign extension |
+| - | 7 | UNUSED |
 
 ## Write-Enable Signals
 
 The two write-enable signals `mem_wen` and `reg_wen` are active HIGH signals that control when the memory and regfile should synchronously store data, respectively.
+
+## `branch` Signal
+
+This is a signal to allow the simplification of the ALU logic, allowing hardware to be reused. When a branch is being executed this signal is set to 1. If the ALU subsequently recieves a `funct3` corresponding to a ADD/SUB R-type instruction the ALU traets this as always being a subtraction. This is required due to the R-type subtraction instruction having the same `funct3` value as the R-type addition instruction. This simplification is possible only because the branch instructions will never require an addition operation, since only the magnitude comparison operators (for BLT[U]/BGE[U]) and subtraction (for BEQ/BNE). This signal may be used in future to allow the system to stall at pipeline hazards, or as a MUX control signal.
