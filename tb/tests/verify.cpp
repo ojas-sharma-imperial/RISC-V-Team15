@@ -8,12 +8,37 @@ unsigned int ticks = 0;
 class CpuTestbench : public Testbench
 {
 protected:
+    void SetUp() override
+    {
+        Testbench::SetUp();
+        initializeInputs();
+        runReset();
+    }
+    
     void initializeInputs() override
     {
         top->clk = 1;
         top->rst = 0;
     }
+
+    void runReset()
+    {
+        top->rst = 1;
+        for (int i = 0; i < 5; i++) { // 5 cycle reset
+            runSimulation();
+        }
+        top->rst = 0;
+    }
 };
+
+/*
+TEST_F(CpuTestbench, RUN_100_CYCLES)
+{
+    for (int i=0; i<100; i++) {
+        runSimulation();
+    }
+}
+*/
 
 TEST_F(CpuTestbench, BaseProgramTest)
 {

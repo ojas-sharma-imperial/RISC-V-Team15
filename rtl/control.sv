@@ -67,7 +67,6 @@ always_comb begin
     case (instruction)
         LUI: begin
             imm_src = U;
-            pc_src = 1'b1;
             reg_wen = 1'b1;
             alu_src_1 = 2'b10;
             alu_src_2 = 1'b1;
@@ -75,7 +74,6 @@ always_comb begin
         end
         AUIPC: begin
             imm_src = U;
-            pc_src = 1'b1;
             reg_wen = 1'b1;
             alu_src_1 = 2'b01;
             alu_src_2 = 1'b1;
