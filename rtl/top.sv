@@ -113,7 +113,6 @@ regfile regfile_inst (
 );
 
 rom #(.ADDRESS_WIDTH(12)) rom_inst (
-    .clk (clk),
     .address (pc_output[11:0]),
     .data (instruction_word)
 );
