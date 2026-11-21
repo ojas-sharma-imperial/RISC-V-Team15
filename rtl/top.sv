@@ -121,6 +121,8 @@ rom #(.ADDRESS_WIDTH(12)) rom_inst (
 ram #(.ADDRESS_WIDTH(17)) ram_inst (
     .clk (clk),
     .wen (mem_wen),
+    // Updated to add SB support: pass store size to RAM.
+    .store_funct3 (funct3),
     .address (alu_result[16:0]),
     .write_data (regfile_read_2),
     .read_data (memory_dout)
