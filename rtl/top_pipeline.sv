@@ -74,7 +74,7 @@ module top_pipeline (
     mem_wb_t mem_wb;
 
     // IF: fetch an instruction using the current PC.
-    rom #(.ADDRESS_WIDTH(12)) instruction_rom (
+    rom #(.ADDRESS_WIDTH(12)) rom_inst (
         .clk (clk),
         .address (pc_if[11:0]),
         .data (instruction_if)
@@ -100,7 +100,7 @@ module top_pipeline (
     logic [31:0] id_rs1_value, id_rs2_value;
     logic [31:0] wb_result;
 
-    control decoder (
+    control control_inst (
         .instruction (id_opcode),
         .funct3 (id_funct3),
         .funct7 (id_funct7),
@@ -116,13 +116,13 @@ module top_pipeline (
         .branch (id_branch)
     );
 
-    sign_extend immediate_decoder (
+    sign_extend sign_extend_inst (
         .instr (if_id.instruction),
         .imm_src (id_imm_src),
         .ext_im (id_imm)
     );
 
-    regfile registers (
+    regfile regfile_inst (
         .clk (clk),
         .a3_wen (mem_wb.valid && mem_wb.reg_wen && !rst),
         .a1 (id_rs1),

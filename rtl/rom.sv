@@ -1,7 +1,6 @@
 module rom #(
     parameter       ADDRESS_WIDTH = 8
 )(
-    input logic                         clk,
     input logic     [ADDRESS_WIDTH-1:0] address,
     output logic    [31:0]    data
 );
