@@ -1,5 +1,5 @@
 module sign_extend #(
-    localparam [2:0] imm_I = 0, imm_U = 4, imm_S = 1, imm_B = 2, imm_J = 3;
+    localparam [2:0] imm_I = 0, imm_U = 4, imm_S = 1, imm_B = 2, imm_J = 3
 )(
     input logic [31:0]      instr,
     input logic [2:0]       imm_src,

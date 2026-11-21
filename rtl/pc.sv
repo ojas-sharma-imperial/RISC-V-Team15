@@ -1,10 +1,14 @@
 module pc(
-    input logic clk, rst, pc_src,
+    input logic clk,
+    input logic rst,
+    input logic pc_src,
     input logic [31:0] imm_op,
     output logic [31:0] pc_output);
     logic [31:0] pc_inc;
     logic [31:0] pc_branch;
     logic [31:0] pc_next;
+
+    localparam [31:0] BOOT_VECTOR = 32'hBFC00000;
 
     always_comb begin : PC_operations
         pc_inc = pc_output + 4;
@@ -18,7 +22,7 @@ module pc(
                     );
 
     always_ff @(posedge clk) begin
-        if (rst == 1) pc_output <= {32{1'b0}};
+        if (rst == 1) pc_output <= BOOT_VECTOR;
         else pc_output <= pc_next;
     end
 endmodule
