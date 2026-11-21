@@ -1,6 +1,7 @@
 module top (
     input   logic clk,
     input   logic rst,
+    input   logic trigger,
     output logic [31:0] a0
 );
 
@@ -55,6 +56,9 @@ mux alu_op2_mux (
 // pc
 
 logic [31:0] pc_output;
+logic [31:0] pc_plus_4;
+
+assign pc_plus_4 = pc_output + 32'd4;
 
 // sign_extend
 
@@ -63,14 +67,24 @@ logic [31:0] extended_imm;
 // ram
 
 logic [31:0] memory_dout;
+logic [31:0] load_result;
+
+always_comb begin
+    case (funct3)
+        3'b000: load_result = {{24{memory_dout[7]}}, memory_dout[7:0]};
+        3'b010: load_result = memory_dout;
+        3'b100: load_result = {24'b0, memory_dout[7:0]};
+        default: load_result = memory_dout;
+    endcase
+end
 
 // --- GENERAL DECLARATIONS ---
 
 mux2 result_mux (
     .in0 (alu_result),
-    .in1 (memory_dout),
-    .in2 (pc_output),
-    .in3 (32'bZ),
+    .in1 (load_result),
+    .in2 (pc_plus_4),
+    .in3 (32'b0),
     .sel (result_src),
     .out (regfile_wd)
 );
@@ -100,14 +114,14 @@ regfile regfile_inst (
 
 rom #(.ADDRESS_WIDTH(12)) rom_inst (
     .clk (clk),
-    .address (pc_output),
+    .address (pc_output[11:0]),
     .data (instruction_word)
 );
 
 ram #(.ADDRESS_WIDTH(17)) ram_inst (
     .clk (clk),
     .wen (mem_wen),
-    .address (alu_result),
+    .address (alu_result[16:0]),
     .write_data (regfile_read_2),
     .read_data (memory_dout)
 );
