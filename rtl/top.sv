@@ -1,6 +1,7 @@
 module top (
     input   logic clk,
-    input   logic rst
+    input   logic rst,
+    output logic [31:0] a0
 );
 
 // --- INSTRUCTION BREAKOUT ---
@@ -53,7 +54,6 @@ mux alu_op2_mux (
 
 // pc
 
-logic [31:0] pc_offset;
 logic [31:0] pc_output;
 
 // sign_extend
@@ -94,7 +94,8 @@ regfile regfile_inst (
     .a3 (rd),
     .wd3 (regfile_wd),
     .rd1 (regfile_read_1),
-    .rd2 (regfile_read_2)
+    .rd2 (regfile_read_2),
+    .a0 (a0)
 );
 
 rom #(.ADDRESS_WIDTH(12)) rom_inst (
@@ -121,7 +122,7 @@ pc pc_inst (
     .clk (clk),
     .rst (rst),
     .pc_src (pc_src),
-    .imm_op (pc_offset),
+    .imm_op (extended_imm),
     .pc_output (pc_output)
 );
 
