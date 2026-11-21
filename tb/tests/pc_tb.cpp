@@ -54,6 +54,20 @@ TEST_F(PCTestBench, RESET_TEST)
     EXPECT_EQ(top->pc_output, BOOT_VECTOR);
 }
 
+TEST_F(PCTestBench, NORMAL_ADVANCE_TEST)
+{
+    runSimulation();
+    EXPECT_EQ(top->pc_output, BOOT_VECTOR+4);
+}
+
+TEST_F(PCTestBench, OFFSET_TEST)
+{
+    top->pc_src = 1; // pc offset taken
+    top-> imm_op = 0x50;
+    runSimulation();
+    EXPECT_EQ(top->pc_output, BOOT_VECTOR+0x50);
+}
+
 int main(int argc, char **argv)
 {
     top = new Vdut;

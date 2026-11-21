@@ -17,25 +17,37 @@ protected:
     }
     void initializeInputs() override
     {
-        top->sel = 0;
-        top->in0 = 0;
-        top->in1 = 0;
-        // output: out
+        top->clk = 0;
+        top->rst = 0;
     }
     void runReset()
     {
-        // all combinational logic so no reset
+        top->rst = 1;
+        runSimulation(5); // 5 clock cycle reset
+        top->rst = 0;
+    }
+    void runSimulation(int cycles = 1) // remove if not combinational only
+    {
+        for (int i = 0; i < cycles; i++) {
+            for (int clk = 0; clk < 2; clk++) {
+                top->eval();
+                #ifndef __APPLE__
+                tfp->dump(2 * ticks + clk);
+                #endif
+                top->clk = !top->clk;
+            }
+            ticks++;
+            if (Verilated::gotFinish()) {
+                exit(0);
+            }
+        }
     }
 };
 
 TEST_F(EXAMPLETestBench, EXAMPLE_TEST)
 {
-    top->sel = 0;
-    top->in0 = 1;
-    top->in1 = 0;
-
-    top->eval();
-    runSimulation();
+    top->eval(); // use this for combinational only
+    runSimulation(); // use this if clocked
 
     EXPECT_EQ(top->out, 1);
 }
