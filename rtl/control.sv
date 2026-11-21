@@ -3,6 +3,7 @@ module control (
     input logic [2:0]   funct3,
     input logic [6:0]   funct7,
     input logic         zero,
+    input logic         rst,
     output logic [1:0]  pc_src,  // Updated to implement JAL/JALR: three next-PC choices.
     output logic [1:0]  result_src,
     output logic [1:0]  alu_src_1,
@@ -162,6 +163,12 @@ always_comb begin
 
         end
     endcase
+
+    //If statement stops the first instruction from running multiple times. This way it only runs once on the posedge the rst is disabled. 
+    if (rst) begin
+        mem_wen = 0;
+        reg_wen = 0;
+    end
 end
 
 endmodule

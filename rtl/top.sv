@@ -157,7 +157,8 @@ control control_inst (
     .alu_control (alu_control),
     .mem_wen (mem_wen),
     .reg_wen (reg_wen),
-    .branch (branch)
+    .branch (branch),
+    .rst (rst)
 );
 
 // control signals
