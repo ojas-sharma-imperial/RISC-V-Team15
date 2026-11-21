@@ -1,7 +1,8 @@
 module pc(
     input logic clk,
     input logic rst,
-    input logic pc_src,
+    input logic [1:0] pc_src,
+    input logic [31:0] jalr_target,
     input logic [31:0] imm_op,
     output logic [31:0] pc_output);
     
@@ -16,11 +17,15 @@ module pc(
         pc_branch = pc_output + imm_op;       
     end
 
-    mux pc_select  (.in1(pc_branch),
-                    .in0(pc_inc),
-                    .sel(pc_src),
-                    .out(pc_next)
-                    );
+    // Updated to implement JAL/JALR: select PC+4, PC-relative, or register-relative target.
+    always_comb begin
+        case (pc_src)
+            2'b00: pc_next = pc_inc;
+            2'b01: pc_next = pc_branch;
+            2'b10: pc_next = jalr_target;
+            default: pc_next = pc_inc;
+        endcase
+    end
 
     always_ff @(posedge clk) begin
         if (rst == 1) pc_output <= BOOT_VECTOR;

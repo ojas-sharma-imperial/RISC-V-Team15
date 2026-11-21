@@ -3,7 +3,7 @@ module control (
     input logic [2:0]   funct3,
     input logic [6:0]   funct7,
     input logic         zero,
-    output logic        pc_src,
+    output logic [1:0]  pc_src,  // Updated to implement JAL/JALR: three next-PC choices.
     output logic [1:0]  result_src,
     output logic [1:0]  alu_src_1,
     output logic        alu_src_2,
@@ -54,7 +54,7 @@ always_comb begin
 
     // initial definitions to avoid latches being inferred
 
-    pc_src = 1'b0;
+    pc_src = 2'b00;
     result_src = 2'b00;
     alu_src_1 = 2'b0;
     alu_src_2 = 1'b0;
@@ -79,43 +79,51 @@ always_comb begin
             alu_src_2 = 1'b1;
             alu_control = ADD_SUB;
         end
+        // JAL jumps to PC + immediate and saves PC + 4 through result_src.
         JAL: begin
             imm_src = J;
+            pc_src = 2'b01;
             result_src = 2'b10;
             reg_wen = 1'b1;
         end
+        // JALR jumps to rs1 + immediate (bit 0 cleared in top) and saves PC + 4.
         JALR: begin
             imm_src = I;
+            pc_src = 2'b10;
+            alu_src_1 = 2'b00;
+            alu_src_2 = 1'b1;
+            alu_control = ADD_SUB;
             result_src = 2'b10;
             reg_wen = 1'b1;
         end
+        // Taken branches use the PC-relative target; untaken branches use PC + 4.
         BRANCH: begin
             imm_src = B;
             branch = 1'b1;
             case (funct3)
                 3'b000:     begin // BEQ
                     alu_control = ADD_SUB;
-                    pc_src = zero;
+                    pc_src = zero ? 2'b01 : 2'b00;
                 end
                 3'b001:     begin // BNE
                     alu_control = ADD_SUB;
-                    pc_src = !zero;
+                    pc_src = !zero ? 2'b01 : 2'b00;
                 end
                 3'b100:     begin // BLT
                     alu_control = SLT;
-                    pc_src = !zero;
+                    pc_src = !zero ? 2'b01 : 2'b00;
                 end
                 3'b101:     begin // BGE
                     alu_control = SLT;
-                    pc_src = zero;
+                    pc_src = zero ? 2'b01 : 2'b00;
                 end
                 3'b110:     begin // BLTU
                     alu_control = SLTU;
-                    pc_src = !zero;
+                    pc_src = !zero ? 2'b01 : 2'b00;
                 end
                 3'b111:     begin // BGEU
                     alu_control = SLTU;
-                    pc_src = zero;
+                    pc_src = zero ? 2'b01 : 2'b00;
                 end
                 default:    begin // defualt subtraction (shouldn't reach this)
                     alu_control = INVALID_INSTR;

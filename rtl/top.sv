@@ -132,11 +132,13 @@ sign_extend sign_extend_inst (
     .ext_im (extended_imm)
 );
 
+// Updated to implement JAL/JALR: connect the ALU-generated JALR target to the PC.
 pc pc_inst (
     .clk (clk),
     .rst (rst),
     .pc_src (pc_src),
     .imm_op (extended_imm),
+    .jalr_target ({alu_result[31:1], 1'b0}),
     .pc_output (pc_output)
 );
 
@@ -158,7 +160,8 @@ control control_inst (
 
 // control signals
 
-logic pc_src;
+// Two-bit PC selection supports sequential execution, branches/JAL, and JALR.
+logic [1:0] pc_src;
 logic [1:0] result_src;
 logic [1:0] alu_src_1;
 logic alu_src_2;
