@@ -78,12 +78,31 @@ protected:
     }
 };
 
-//                 pc  res  a1  a2  imm  aluc  mw  rw  br
+//                  pc  res  a1  a2  imm  aluc  mw  rw  br
+
+// U-type 
 TEST_F(ControlTestbench, LUI)
 {
-    check(LUI, 0, {0,   0,  2,  1,  4,   0,    0,  1,  0});
+    check(LUI, 0, {0, 0, 2, 1, 4, 0, 0, 1, 0});
 }
 
+TEST_F(ControlTestbench, AUIPC)
+{
+    check(AUIPC, 0, {0, 0, 1, 1, 4, 0, 0, 1, 0});
+}
+
+// Jumps 
+TEST_F(ControlTestbench, JAL)
+{
+    check(JAL, 0, {1, 2, 0, 0, 3, 0, 0, 1, 0});
+}
+
+TEST_F(ControlTestbench, JALR)
+{
+    check(JALR, 0, {2, 2, 0, 1, 0, 0, 0, 1, 0});
+}
+
+// Branches (zero flag decides taken / not taken)
 TEST_F(ControlTestbench, BEQ_NotTaken)
 {
     check(BEQ, 0, {0, 0, 0, 0, 2, 0, 0, 0, 1});
@@ -94,6 +113,79 @@ TEST_F(ControlTestbench, BEQ_Taken)
     check(BEQ, 1, {1, 0, 0, 0, 2, 0, 0, 0, 1});
 }
 
+TEST_F(ControlTestbench, BNE_NotTaken)
+{
+    check(BNE, 1, {0, 0, 0, 0, 2, 0, 0, 0, 1});
+}
+
+TEST_F(ControlTestbench, BNE_Taken)
+{
+    check(BNE, 0, {1, 0, 0, 0, 2, 0, 0, 0, 1});
+}
+
+TEST_F(ControlTestbench, BLT_ZeroLow)
+{
+    check(BLT, 0, {1, 0, 0, 0, 2, 2, 0, 0, 1});
+}
+
+TEST_F(ControlTestbench, BLT_ZeroHigh)
+{
+    check(BLT, 1, {0, 0, 0, 0, 2, 2, 0, 0, 1});
+}
+
+TEST_F(ControlTestbench, BGE_ZeroLow)
+{
+    check(BGE, 0, {0, 0, 0, 0, 2, 2, 0, 0, 1});
+}
+
+TEST_F(ControlTestbench, BGE_ZeroHigh)
+{
+    check(BGE, 1, {1, 0, 0, 0, 2, 2, 0, 0, 1});
+}
+
+TEST_F(ControlTestbench, BLTU_ZeroLow)
+{
+    check(BLTU, 0, {1, 0, 0, 0, 2, 3, 0, 0, 1});
+}
+
+TEST_F(ControlTestbench, BLTU_ZeroHigh)
+{
+    check(BLTU, 1, {0, 0, 0, 0, 2, 3, 0, 0, 1});
+}
+
+TEST_F(ControlTestbench, BGEU_ZeroLow)
+{
+    check(BGEU, 0, {0, 0, 0, 0, 2, 3, 0, 0, 1});
+}
+
+TEST_F(ControlTestbench, BGEU_ZeroHigh)
+{
+    check(BGEU, 1, {1, 0, 0, 0, 2, 3, 0, 0, 1});
+}
+
+// Load / store
+TEST_F(ControlTestbench, LW)
+{
+    check(LW, 0, {0, 1, 0, 1, 0, 0, 0, 1, 0});
+}
+
+TEST_F(ControlTestbench, SW)
+{
+    check(SW, 0, {0, 0, 0, 1, 1, 0, 1, 0, 0});
+}
+
+// ALU immediate
+TEST_F(ControlTestbench, ADDI)
+{
+    check(ADDI, 0, {0, 0, 0, 1, 0, 0, 0, 1, 0});
+}
+
+TEST_F(ControlTestbench, XORI)
+{
+    check(XORI, 0, {0, 0, 0, 1, 0, 4, 0, 1, 0});
+}
+
+// ALU register
 TEST_F(ControlTestbench, ADD_REG)
 {
     check(ADD, 0, {0, 0, 0, 0, 5, 0, 0, 1, 0});
@@ -104,16 +196,30 @@ TEST_F(ControlTestbench, AND_REG)
     check(AND, 0, {0, 0, 0, 0, 5, 7, 0, 1, 0});
 }
 
+// Invalid opcode: nothing should be written
+TEST_F(ControlTestbench, INVALID)
+{
+    check(INVALID, 0, {0, 0, 0, 0, 7, 0, 0, 0, 0});
+}
 
-// Your fix: reset must block all writes, even for an instruction that writes
-//TEST_F(ControlTestbench, ResetBlocksWrites)
-//{
-//    top->rst = 1;
-//    top->instruction = OP_ALUREG;
-//   top->eval();
-//    EXPECT_EQ(top->reg_wen, 0);
-//    EXPECT_EQ(top->mem_wen, 0);
-//}
+// Reset blocks writes
+TEST_F(ControlTestbench, ResetBlocksRegWrite)
+{
+    top->rst = 1;
+    top->instruction = ADD.opcode;
+    top->eval();
+    EXPECT_EQ(top->reg_wen, 0);
+    EXPECT_EQ(top->mem_wen, 0);
+}
+
+TEST_F(ControlTestbench, ResetBlocksMemWrite)
+{
+    top->rst = 1;
+    top->instruction = SW.opcode;
+    top->eval();
+    EXPECT_EQ(top->reg_wen, 0);
+    EXPECT_EQ(top->mem_wen, 0);
+}
 
 int main(int argc, char **argv)
 {
