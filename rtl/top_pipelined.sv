@@ -1,177 +1,177 @@
 module top (
     input   logic clk,
     input   logic rst,
-    input   logic trigger,
     output logic [31:0] a0
 );
 
-// --- INSTRUCTION BREAKOUT ---
+// ---- FETCH STAGE ----
 
-logic [31:0] instruction_word;
-logic [6:0] opcode;
-logic [4:0] rd;
-logic [4:0] rs1;
-logic [4:0] rs2;
-logic [6:0] funct7;
-logic [2:0] funct3;
+// define wires from previous pipeline stage
 
-assign opcode = instruction_word[6:0];
-assign rd = instruction_word[11:7];
-assign rs1 = instruction_word[19:15];
-assign rs2 = instruction_word[24:20];
-assign funct7 = instruction_word[31:25];
-assign funct3 = instruction_word[14:12];
+logic [31:0] instruction_F;
+logic [31:0] pc_F;
+logic [31:0] pc_plus_4_F;
 
-// --- CONNECTION WIRES ---
-
-// regfile
-
-logic [31:0] regfile_read_1;
-logic [31:0] regfile_read_2;
-logic [31:0] regfile_wd;
-
-// alu
-
-logic [31:0] alu_op1;
-logic [31:0] alu_op2;
-logic [31:0] alu_result;
-logic alu_zero;
-
-mux2 alu_op1_mux (
-    .in0 (regfile_read_1),
-    .in1 (pc_output),
-    .in2 (32'b0),
-    .in3 (32'bZ),
-    .sel (alu_src_1),
-    .out (alu_op1)
-);
-
-mux alu_op2_mux (
-    .in0 (regfile_read_2),
-    .in1 (extended_imm),
-    .sel (alu_src_2),
-    .out (alu_op2)
-);
-
-// pc
-
-logic [31:0] pc_output;
-logic [31:0] pc_plus_4;
-
-assign pc_plus_4 = pc_output + 32'd4;
-
-// sign_extend
-
-logic [31:0] extended_imm;
-
-// ram
-
-logic [31:0] memory_dout;
-logic [31:0] load_result;
-
-always_comb begin
-    case (funct3)
-        3'b000: load_result = {{24{memory_dout[7]}}, memory_dout[7:0]};
-        3'b010: load_result = memory_dout;
-        3'b100: load_result = {24'b0, memory_dout[7:0]};
-        default: load_result = memory_dout;
-    endcase
-end
-
-// --- GENERAL DECLARATIONS ---
-
-mux2 result_mux (
-    .in0 (alu_result),
-    .in1 (load_result),
-    .in2 (pc_plus_4),
-    .in3 (32'b0),
-    .sel (result_src),
-    .out (regfile_wd)
-);
-
-alu alu_inst (
-    .alu_src_2 (alu_src_2),
-    .branch (branch),
-    .alu_op1 (alu_op1),
-    .alu_op2 (alu_op2),
-    .alu_control (alu_control),
-    .funct7 (funct7),
-    .alu_out (alu_result),
-    .zero (alu_zero)
-);
-
-regfile regfile_inst (
+pipereg_fetch_decode pipereg_fetch_decode_inst (
     .clk (clk),
-    .a3_wen (reg_wen),
-    .a1 (rs1),
-    .a2 (rs2),
-    .a3 (rd),
-    .wd3 (regfile_wd),
-    .rd1 (regfile_read_1),
-    .rd2 (regfile_read_2),
-    .a0 (a0)
+    .instruction_F (instruction_F), // FETCH SIDE
+    .pc_F (pc_F),
+    .pc_plus_4_F (pc_plus_4_F),
+    .instruction_D (instruction_D), // DECODE SIDE
+    .pc_D (pc_D),
+    .pc_plus_4_D (pc_plus_4_D)
 );
 
-rom #(.ADDRESS_WIDTH(12)) rom_inst (
-    .address (pc_output[11:0]),
-    .data (instruction_word)
-);
+// ---- DECODE STAGE ----
 
-ram #(.ADDRESS_WIDTH(17)) ram_inst (
+// define wires from previous pipeline stage
+
+logic [31:0] instruction_D;
+logic [31:0] pc_D;
+logic [31:0] pc_plus_4_D;
+
+// define additional wires to next pipeline stage
+
+logic [31:0] rd1_D;
+logic [31:0] rd2_D;
+logic [4:0] rs1_D;
+logic [4:0] rs2_D;
+logic [4:0] rd_D;
+logic [31:0] ext_imm_D;
+logic [1:0] pc_src_D;
+logic [1:0] result_src_D;
+logic [1:0] alu_src_1_D;
+logic alu_src_2_D;
+logic [2:0] alu_control_D;
+logic mem_wen_D;
+logic reg_wen_D;
+logic branch_D;
+
+pipereg_decode_execute pipereg_decode_execute_inst (
     .clk (clk),
-    .wen (mem_wen),
-    // Updated to add SB support: pass store size to RAM.
-    .store_funct3 (funct3),
-    .address (alu_result[16:0]),
-    .write_data (regfile_read_2),
-    .read_data (memory_dout)
+    .rd1_D (rd1_D), // DECODE SIDE
+    .rd2_D (rd2_D),
+    .pc_D (pc_D),
+    .rs1_D (rs1_D),
+    .rs2_D (rs2_D),
+    .rd_D (rd_D),
+    .ext_imm_D (ext_imm_D),
+    .pc_plus_4_D (pc_plus_4_D),
+    .pc_src_D (pc_src_D),
+    .result_src_D (result_src_D),
+    .alu_src_1_D (alu_src_1_D),
+    .alu_src_2_D (alu_src_2_D),
+    .alu_control_D (alu_control_D),
+    .mem_wen_D (mem_wen_D),
+    .reg_wen_D (reg_wen_D),
+    .branch_D (branch_D),
+    .rd1_E (rd1_E), // EXECUTE SIDE
+    .rd2_E (rd2_E),
+    .pc_E (pc_E),
+    .rs1_E (rs1_E),
+    .rs2_E (rs2_E),
+    .rd_E (rd_E),
+    .ext_imm_E (ext_imm_E),
+    .pc_plus_4_E (pc_plus_4_E),
+    .pc_src_E (pc_src_E),
+    .result_src_E (result_src_E),
+    .alu_src_1_E (alu_src_1_E),
+    .alu_src_2_E (alu_src_2_E),
+    .alu_control_E (alu_control_E),
+    .mem_wen_E (mem_wen_E),
+    .reg_wen_E (reg_wen_E),
+    .branch_E (branch_E)
 );
 
-sign_extend sign_extend_inst (
-    .instr(instruction_word),
-    .imm_src (imm_src),
-    .ext_im (extended_imm)
-);
+// ---- EXECUTE STAGE ----
 
-// Updated to implement JAL/JALR: connect the ALU-generated JALR target to the PC.
-pc pc_inst (
+// define wires from previous pipeline stage
+
+logic [31:0] rd1_E;
+logic [31:0] rd2_E;
+logic [31:0] pc_E;
+logic [4:0] rs1_E;
+logic [4:0] rs2_E;
+logic [4:0] rd_E;
+logic [31:0] ext_imm_E;
+logic [31:0] pc_plus_4_E;
+logic [1:0] pc_src_E;
+logic [1:0] result_src_E;
+logic [1:0] alu_src_1_E;
+logic alu_src_2_E;
+logic [2:0] alu_control_E;
+logic mem_wen_E;
+logic reg_wen_E;
+logic branch_E;
+
+// define additional wires to next pipeline stage
+
+logic [31:0] alu_out_E;
+logic [31:0] mem_wd_E;
+
+pipereg_execute_mem pipereg_execute_mem_inst (
     .clk (clk),
-    .rst (rst),
-    .pc_src (pc_src),
-    .imm_op (extended_imm),
-    .jalr_target ({alu_result[31:1], 1'b0}),
-    .pc_output (pc_output)
+    .alu_out_E (alu_out_E), // EXECUTE SIDE
+    .mem_wd_E (mem_wd_E),
+    .rd_E (rd_E),
+    .pc_plus_4_E (pc_plus_4_E),
+    .reg_wen_E (reg_wen_E),
+    .mem_wen_E (mem_wen_E),
+    .result_src_E (result_src_E),
+    .alu_out_M (alu_out_M), // MEMORY SIDE
+    .mem_wd_M (mem_wd_M),
+    .rd_M (rd_M),
+    .pc_plus_4_M (pc_plus_4_M),
+    .reg_wen_M (reg_wen_M),
+    .mem_wen_M (mem_wen_M),
+    .result_src_M (result_src_M)
 );
 
-control control_inst (
-    .instruction (opcode),
-    .funct3 (funct3),
-    .funct7 (funct7),
-    .zero (alu_zero),
-    .pc_src (pc_src),
-    .result_src (result_src),
-    .alu_src_1 (alu_src_1),
-    .alu_src_2 (alu_src_2),
-    .imm_src (imm_src),
-    .alu_control (alu_control),
-    .mem_wen (mem_wen),
-    .reg_wen (reg_wen),
-    .branch (branch),
-    .rst (rst)
+// ---- MEMORY STAGE ----
+
+// define wires from previous pipeline stage
+
+logic [31:0] alu_out_M;
+logic [31:0] mem_wd_M;
+logic [4:0] rd_M;
+logic [31:0] pc_plus_4_M;
+logic reg_wen_M;
+logic mem_wen_M;
+logic [1:0] result_src_M;
+
+// define additional wires to next pipeline stage
+
+logic [31:0] mem_rd_M;
+
+pipereg_mem_wb pipereg_mem_wb_inst (
+    .clk (clk),
+    .alu_out_M (alu_out_M), // MEMORY SIDE
+    .mem_rd_M (mem_rd_M),
+    .rd_M (rd_M),
+    .pc_plus_4_M (pc_plus_4_M),
+    .reg_wen_M (reg_wen_M),
+    .result_src_M (result_src_M),
+    .alu_out_W (alu_out_W), // WRITEBACK SIDE
+    .mem_rd_W (mem_rd_W),
+    .rd_W (rd_W),
+    .pc_plus_4_W (pc_plus_4_W),
+    .reg_wen_W (reg_wen_W),
+    .result_src_W (result_src_W),
 );
 
-// control signals
+// ---- WRITEBACK STAGE ----
 
-// Two-bit PC selection supports sequential execution, branches/JAL, and JALR.
-logic [1:0] pc_src;
-logic [1:0] result_src;
-logic [1:0] alu_src_1;
-logic alu_src_2;
-logic [2:0] imm_src;
-logic [2:0] alu_control;
-logic mem_wen;
-logic reg_wen;
-logic branch;
+// define wires from previous pipeline stage
 
+logic [31:0] alu_out_W;
+logic [31:0] mem_rd_W;
+logic [4:0] rd_W;
+logic [31:0] pc_plus_4_W;
+logic reg_wen_W;
+logic [1:0] result_src_W;
+
+// define additional wires to next pipeline stage
+
+logic [31:0] result_W;
 
 endmodule
