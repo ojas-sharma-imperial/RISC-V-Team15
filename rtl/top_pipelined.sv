@@ -12,6 +12,24 @@ logic [31:0] instruction_F;
 logic [31:0] pc_F;
 logic [31:0] pc_plus_4_F;
 
+// Program counter
+pc pc_inst (
+    .clk(clk),
+    .rst(rst),
+    .pc_src(1'b0),
+    .pc_target(32'b0),
+    .pc_output(pc_F)
+);
+
+// Calculate PC + 4
+assign pc_plus_4_F = pc_F + 32'd4;
+
+// Instruction memory
+rom #(.ADDRESS_WIDTH(12)) rom_inst (
+    .address(pc_F[11:0]),
+    .data(instruction_F)
+);
+
 pipereg_fetch_decode pipereg_fetch_decode_inst (
     .clk (clk),
     .instruction_F (instruction_F), // FETCH SIDE
@@ -156,7 +174,7 @@ pipereg_mem_wb pipereg_mem_wb_inst (
     .rd_W (rd_W),
     .pc_plus_4_W (pc_plus_4_W),
     .reg_wen_W (reg_wen_W),
-    .result_src_W (result_src_W),
+    .result_src_W (result_src_W)
 );
 
 // ---- WRITEBACK STAGE ----
