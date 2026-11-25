@@ -7,14 +7,18 @@ module top (
 // ---- HAZARD UNIT ----
 
 hazard_unit hazard_unit_inst (
-    .Rs1E (),
-    .Rs2E (),
-    .RdM (),
-    .RdW (),
-    .RegWriteM (),
-    .RegWriteW (),
-    .Forward1E (),
-    .Forward2E ()
+    .rs1_E (),
+    .rs2_E (),
+    .rd_M (),
+    .rd_W (),
+    .reg_write_M (),
+    .reg_write_W (),
+    .forward1_E (),
+    .forward2_E (),
+    .rs1_D(),
+    .rs2_D(),
+    .rd_E(),
+    .result_src_E()
 );
 
 // ---- FETCH STAGE ----
