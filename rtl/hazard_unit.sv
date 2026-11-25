@@ -4,10 +4,14 @@
 //Output signal = 10 for Mem forward, 01 for Write, 00 for no forward 
 
 module hazard_unit(
-    input  logic [4:0] Rs1E, Rs2E, //connect to a1, a2
-    input  logic [4:0] RdM, RdW, //connect to a3
-    input  logic       RegWriteM, RegWriteW,
-    output logic [1:0] Forward1E, Forward2E
+    input  logic [4:0] Rs1E, //connect to a1
+    input  logic [4:0] Rs2E, //connect to a2
+    input  logic [4:0] RdM, //connect to a3
+    input  logic [4:0] RdW, //connect to a3
+    input  logic       RegWriteM,
+    input  logic       RegWriteW,
+    output logic [1:0] Forward1E,
+    output logic [1:0] Forward2E
 );
 
 always_comb begin : data_hazard

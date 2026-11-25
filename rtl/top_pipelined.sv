@@ -4,27 +4,32 @@ module top (
     output logic [31:0] a0
 );
 
+// ---- HAZARD UNIT ----
+
+hazard_unit hazard_unit_inst (
+    .Rs1E (),
+    .Rs2E (),
+    .RdM (),
+    .RdW (),
+    .RegWriteM (),
+    .RegWriteW (),
+    .Forward1E (),
+    .Forward2E ()
+);
+
 // ---- FETCH STAGE ----
 
-// define wires from previous pipeline stage
+// main instantiations
 
-logic [31:0] instruction_F;
-logic [31:0] pc_F;
-logic [31:0] pc_plus_4_F;
-
-// Program counter
 pc pc_inst (
     .clk(clk),
     .rst(rst),
     .pc_src(1'b0),
     .pc_target(32'b0),
+    .pc_plus_4 (pc_plus_4_F),
     .pc_output(pc_F)
 );
 
-// Calculate PC + 4
-assign pc_plus_4_F = pc_F + 32'd4;
-
-// Instruction memory
 rom #(.ADDRESS_WIDTH(12)) rom_inst (
     .address(pc_F[11:0]),
     .data(instruction_F)
@@ -40,6 +45,12 @@ pipereg_fetch_decode pipereg_fetch_decode_inst (
     .pc_plus_4_D (pc_plus_4_D)
 );
 
+// define additional wires to next pipeline stage
+
+logic [31:0] instruction_F;
+logic [31:0] pc_F;
+logic [31:0] pc_plus_4_F;
+
 // ---- DECODE STAGE ----
 
 // define wires from previous pipeline stage
@@ -47,6 +58,55 @@ pipereg_fetch_decode pipereg_fetch_decode_inst (
 logic [31:0] instruction_D;
 logic [31:0] pc_D;
 logic [31:0] pc_plus_4_D;
+
+// main instantiations
+
+logic [6:0] opcode_D;
+logic [6:0] funct7_D;
+logic [2:0] funct3_D;
+logic [2:0] imm_src_D;
+
+assign opcode_D = instruction_D[6:0];
+assign rd_D = instruction_D[11:7];
+assign rs1_D = instruction_D[19:15];
+assign rs2_D = instruction_D[24:20];
+assign funct7_D = instruction_D[31:25];
+assign funct3_D = instruction_D[14:12];
+
+control control_inst (
+    .instruction (opcode_D),
+    .funct3 (funct3_D),
+    .funct7 (funct7_D),
+    .zero (), // AAAAAAAAAAAA HEELPPP ME PLS :)
+    .pc_src (pc_src_D),
+    .result_src (result_src_D),
+    .alu_src_1 (alu_src_1_D),
+    .alu_src_2 (alu_src_2_D),
+    .imm_src (imm_src_D),
+    .alu_control (alu_control_D),
+    .mem_wen (mem_wen_D),
+    .reg_wen (reg_wen_D),
+    .branch (branch_D),
+    .rst (rst)
+);
+
+regfile regfile_inst (
+    .clk (clk),
+    .a3_wen (reg_wen_W),
+    .a1 (rs1_D),
+    .a2 (rs2_D),
+    .a3 (rd_W),
+    .wd3 (result_W),
+    .rd1 (rd1_D),
+    .rd2 (rd2_D),
+    .a0 (a0)
+);
+
+sign_extend sign_extend_inst (
+    .instr(instruction_D),
+    .imm_src (imm_src_D),
+    .ext_im (ext_imm_D)
+);
 
 // define additional wires to next pipeline stage
 
@@ -122,6 +182,19 @@ logic mem_wen_E;
 logic reg_wen_E;
 logic branch_E;
 
+// main instantiations
+
+alu alu_inst (
+    .alu_src_2 (alu_src_2_E),
+    .branch (branch_E),
+    .alu_op1 (),
+    .alu_op2 (),
+    .alu_control (alu_control_E),
+    .funct7 (),
+    .alu_out (alu_out_E),
+    .zero ()
+);
+
 // define additional wires to next pipeline stage
 
 logic [31:0] alu_out_E;
@@ -157,6 +230,8 @@ logic reg_wen_M;
 logic mem_wen_M;
 logic [1:0] result_src_M;
 
+// main instantiations
+
 // define additional wires to next pipeline stage
 
 logic [31:0] mem_rd_M;
@@ -187,6 +262,8 @@ logic [4:0] rd_W;
 logic [31:0] pc_plus_4_W;
 logic reg_wen_W;
 logic [1:0] result_src_W;
+
+// main instantiations
 
 // define additional wires to next pipeline stage
 
