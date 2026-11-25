@@ -21,7 +21,7 @@ protected:
         top->clk = 0;
         top->rst = 0;
         top->pc_src = 0;
-        top->imm_op = 0;
+        top->pc_target = 0;
     }
     void runReset()
     {
@@ -63,7 +63,7 @@ TEST_F(PCTestBench, NORMAL_ADVANCE_TEST)
 TEST_F(PCTestBench, OFFSET_TEST)
 {
     top->pc_src = 1; // pc offset taken
-    top-> imm_op = 0x50;
+    top->pc_target = 0x50;
     runSimulation();
     EXPECT_EQ(top->pc_output, BOOT_VECTOR+0x50);
 }
