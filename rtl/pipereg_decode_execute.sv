@@ -8,6 +8,8 @@ module pipereg_decode_execute (
     input logic [4:0]   rd_D,
     input logic [31:0]  ext_imm_D,
     input logic [31:0]  pc_plus_4_D,
+    input logic [2:0]    funct3_D,
+    input logic [6:0]    funct7_D,
     input logic [1:0]   result_src_D,
     input logic [1:0]   alu_src_1_D,
     input logic         alu_src_2_D,
@@ -23,6 +25,8 @@ module pipereg_decode_execute (
     output logic [4:0]  rd_E,
     output logic [31:0] ext_imm_E,
     output logic [31:0] pc_plus_4_E,
+    output logic [2:0]   funct3_E,
+    output logic [6:0]   funct7_E,
     output logic [1:0]  result_src_E,
     output logic [1:0]  alu_src_1_E,
     output logic        alu_src_2_E,
@@ -40,6 +44,8 @@ logic [4:0] rs2_reg;
 logic [4:0] rd_reg;
 logic [31:0] ext_imm_reg;
 logic [31:0] pc_plus_4_reg;
+logic [2:0] funct3_reg;
+logic [6:0] funct7_reg;
 logic [1:0] result_src_reg;
 logic [1:0] alu_src_1_reg;
 logic alu_src_2_reg;
@@ -57,6 +63,8 @@ always_comb begin
     rd_E = rd_reg;
     ext_imm_E = ext_imm_reg;
     pc_plus_4_E = pc_plus_4_reg;
+    funct3_E = funct3_reg;
+    funct7_E = funct7_reg;
     result_src_E = result_src_reg;
     alu_src_1_E = alu_src_1_reg;
     alu_src_2_E = alu_src_2_reg;
@@ -75,6 +83,8 @@ always_ff @(negedge clk) begin
     rd_reg <= rd_D;
     ext_imm_reg <= ext_imm_D;
     pc_plus_4_reg <= pc_plus_4_D;
+    funct3_reg <= funct3_D;
+    funct7_reg <= funct7_D;
     result_src_reg <= result_src_D;
     alu_src_1_reg <= alu_src_1_D;
     alu_src_2_reg <= alu_src_2_D;
