@@ -34,4 +34,8 @@ always_ff @(posedge clk) begin
     end
 end
 
+always_ff @(negedge clk) begin
+    //writeback
+end
+
 endmodule

@@ -17,7 +17,7 @@ module pipereg_decode_execute (
     input logic         mem_wen_D,
     input logic         reg_wen_D,
     input logic         branch_D,
-    input logic         stall,
+    input logic         stall, flush,
     output logic [31:0] rd1_E, // data OUTPUT signals
     output logic [31:0] rd2_E,
     output logic [31:0] pc_E,
@@ -75,8 +75,8 @@ always_comb begin
     branch_E = branch_reg;
 end
 
-always_ff @(negedge clk) begin
-    if (stall) begin
+always_ff @(posedge clk) begin
+    if (stall | flush) begin
         rd1_reg <= '0;
         rd2_reg <= '0;
         pc_reg <= '0;

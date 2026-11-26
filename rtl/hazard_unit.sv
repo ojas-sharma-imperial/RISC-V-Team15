@@ -6,7 +6,11 @@
 //Stalling only occurs when a load instruction is followed by an instruction that uses the register
 //that is being loaded to so all we have to do is check that then send a stall signal if true
 
+//For the moment the control hazard can be handled by always not taking the branch and if it turns out
+//that the branch should be taken then we flush everything and the PC automatically points at the right
+//instruction. At some point we could implement that finite state machine branching.
 module hazard_unit(
+    //data hazard forwarding
     input  logic [4:0] rs1_E, //connect to a1
     input  logic [4:0] rs2_E, //connect to a2
     input  logic [4:0] rd_M, //connect to a3
@@ -15,9 +19,13 @@ module hazard_unit(
     input  logic       reg_write_W,
     output logic [1:0] forward1_E,
     output logic [1:0] forward2_E,
+    //data hazard stalling
     input logic [4:0] rs1_D, rs2_D, rd_E,
     input logic [1:0] result_src_E,
-    output logic stall //stall should freeze PC, and the two first pipeline registers, and send no-op into ALU.
+    output logic stall, //stall should freeze PC, and the two first pipeline registers, and send no-op into ALU.
+    //control hazard flushing
+    input logic pc_src_E,
+    output logic flush
 );
 
 always_comb begin : data_hazard_forwarding
@@ -44,6 +52,13 @@ always_comb begin : data_hazard_stalling
         if ((rs1_D == rd_E) | (rs2_D == rd_E))
             stall = 1;
     end
+end
+
+always_comb begin : control_hazard_flushing
+    if (pc_src_E)
+        flush = 1;
+    else
+        flush = 0; 
 end
 
 endmodule

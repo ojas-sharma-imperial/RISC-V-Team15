@@ -30,7 +30,7 @@ always_comb begin
     result_src_W = result_src_reg;
 end
 
-always_ff @(negedge clk) begin
+always_ff @(posedge clk) begin
     alu_out_reg <= alu_out_M;
     mem_rd_reg <= mem_rd_M;
     rd_reg <= rd_M;
