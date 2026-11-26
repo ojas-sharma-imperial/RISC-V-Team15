@@ -275,4 +275,12 @@ logic [1:0] result_src_W;
 
 logic [31:0] result_W;
 
+writeback writeback_inst (
+    .alu_out_W (alu_out_W),
+    .mem_rd_W (mem_rd_W),
+    .pc_plus_4_W (pc_plus_4_W),
+    .result_src_W (result_src_W),
+    .result_W (result_W)
+);
+    
 endmodule
