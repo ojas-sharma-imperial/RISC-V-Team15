@@ -2,6 +2,7 @@ module pc(
     input logic clk,
     input logic rst,
     input logic pc_src,
+    input logic stall,
     input logic [31:0] pc_target,
     output logic [31:0] pc_plus_4,
     output logic [31:0] pc_output);
@@ -24,6 +25,6 @@ module pc(
 
     always_ff @(posedge clk) begin
         if (rst == 1) pc_output <= BOOT_VECTOR;
-        else pc_output <= pc_next;
+        else if (!stall) pc_output <= pc_next;
     end
 endmodule

@@ -16,6 +16,7 @@ module pipereg_decode_execute (
     input logic         mem_wen_D,
     input logic         reg_wen_D,
     input logic         branch_D,
+    input logic         stall,
     output logic [31:0] rd1_E, // data OUTPUT signals
     output logic [31:0] rd2_E,
     output logic [31:0] pc_E,
@@ -71,22 +72,42 @@ always_comb begin
 end
 
 always_ff @(negedge clk) begin
-    rd1_reg <= rd1_D;
-    rd2_reg <= rd2_D;
-    pc_reg <= pc_D;
-    rs1_reg <= rs1_D;
-    rs2_reg <= rs2_D;
-    rd_reg <= rd_D;
-    ext_imm_reg <= ext_imm_D;
-    pc_plus_4_reg <= pc_plus_4_D;
-    pc_src_reg <= pc_src_D;
-    result_src_reg <= result_src_D;
-    alu_src_1_reg <= alu_src_1_D;
-    alu_src_2_reg <= alu_src_2_D;
-    alu_control_reg <= alu_control_D;
-    mem_wen_reg <= mem_wen_D;
-    reg_wen_reg <= reg_wen_D;
-    branch_reg <= branch_D;
+    if (stall) begin
+        rd1_reg <= '0;
+        rd2_reg <= '0;
+        pc_reg <= '0;
+        rs1_reg <= '0;
+        rs2_reg <= '0;
+        rd_reg <= '0;
+        ext_imm_reg <= '0;
+        pc_plus_4_reg <= '0;
+        pc_src_reg <= '0;
+        result_src_reg <= '0;
+        alu_src_1_reg <= '0;
+        alu_src_2_reg <= '0;
+        alu_control_reg <= '0;
+        mem_wen_reg <= '0;
+        reg_wen_reg <= '0;
+        branch_reg <= '0;        
+    end
+    else begin
+        rd1_reg <= rd1_D;
+        rd2_reg <= rd2_D;
+        pc_reg <= pc_D;
+        rs1_reg <= rs1_D;
+        rs2_reg <= rs2_D;
+        rd_reg <= rd_D;
+        ext_imm_reg <= ext_imm_D;
+        pc_plus_4_reg <= pc_plus_4_D;
+        pc_src_reg <= pc_src_D;
+        result_src_reg <= result_src_D;
+        alu_src_1_reg <= alu_src_1_D;
+        alu_src_2_reg <= alu_src_2_D;
+        alu_control_reg <= alu_control_D;
+        mem_wen_reg <= mem_wen_D;
+        reg_wen_reg <= reg_wen_D;
+        branch_reg <= branch_D;        
+    end
 end
 
 endmodule

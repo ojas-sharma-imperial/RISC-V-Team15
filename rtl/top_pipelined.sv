@@ -18,7 +18,8 @@ hazard_unit hazard_unit_inst (
     .rs1_D(),
     .rs2_D(),
     .rd_E(),
-    .result_src_E()
+    .result_src_E(),
+    .stall()
 );
 
 // ---- FETCH STAGE ----
@@ -31,7 +32,8 @@ pc pc_inst (
     .pc_src(1'b0),
     .pc_target(32'b0),
     .pc_plus_4 (pc_plus_4_F),
-    .pc_output(pc_F)
+    .pc_output(pc_F),
+    .stall()
 );
 
 rom #(.ADDRESS_WIDTH(12)) rom_inst (
@@ -46,7 +48,8 @@ pipereg_fetch_decode pipereg_fetch_decode_inst (
     .pc_plus_4_F (pc_plus_4_F),
     .instruction_D (instruction_D), // DECODE SIDE
     .pc_D (pc_D),
-    .pc_plus_4_D (pc_plus_4_D)
+    .pc_plus_4_D (pc_plus_4_D),
+    .stall()
 );
 
 // define additional wires to next pipeline stage
@@ -162,7 +165,8 @@ pipereg_decode_execute pipereg_decode_execute_inst (
     .alu_control_E (alu_control_E),
     .mem_wen_E (mem_wen_E),
     .reg_wen_E (reg_wen_E),
-    .branch_E (branch_E)
+    .branch_E (branch_E),
+    .stall()
 );
 
 // ---- EXECUTE STAGE ----
