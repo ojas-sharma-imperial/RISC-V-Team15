@@ -84,8 +84,6 @@ control control_inst (
     .instruction (opcode_D),
     .funct3 (funct3_D),
     .funct7 (funct7_D),
-    .zero (), // AAAAAAAAAAAA HEELPPP ME PLS :)
-    .pc_src (pc_src_D),
     .result_src (result_src_D),
     .alu_src_1 (alu_src_1_D),
     .alu_src_2 (alu_src_2_D),
@@ -123,7 +121,6 @@ logic [4:0] rs1_D;
 logic [4:0] rs2_D;
 logic [4:0] rd_D;
 logic [31:0] ext_imm_D;
-logic [1:0] pc_src_D;
 logic [1:0] result_src_D;
 logic [1:0] alu_src_1_D;
 logic alu_src_2_D;
@@ -142,7 +139,8 @@ pipereg_decode_execute pipereg_decode_execute_inst (
     .rd_D (rd_D),
     .ext_imm_D (ext_imm_D),
     .pc_plus_4_D (pc_plus_4_D),
-    .pc_src_D (pc_src_D),
+    .funct3_D (funct3_D),
+    .funct7_D (funct7_D),
     .result_src_D (result_src_D),
     .alu_src_1_D (alu_src_1_D),
     .alu_src_2_D (alu_src_2_D),
@@ -158,7 +156,8 @@ pipereg_decode_execute pipereg_decode_execute_inst (
     .rd_E (rd_E),
     .ext_imm_E (ext_imm_E),
     .pc_plus_4_E (pc_plus_4_E),
-    .pc_src_E (pc_src_E),
+    .funct3_E (funct3_E),
+    .funct7_E (funct7_E),
     .result_src_E (result_src_E),
     .alu_src_1_E (alu_src_1_E),
     .alu_src_2_E (alu_src_2_E),
@@ -181,7 +180,10 @@ logic [4:0] rs2_E;
 logic [4:0] rd_E;
 logic [31:0] ext_imm_E;
 logic [31:0] pc_plus_4_E;
-logic [1:0] pc_src_E;
+logic pc_src_E;
+logic [31:0] pc_target_E;
+logic [2:0] funct3_E;
+logic [6:0] funct7_E;
 logic [1:0] result_src_E;
 logic [1:0] alu_src_1_E;
 logic alu_src_2_E;
@@ -277,4 +279,12 @@ logic [1:0] result_src_W;
 
 logic [31:0] result_W;
 
+writeback writeback_inst (
+    .alu_out_W (alu_out_W),
+    .mem_rd_W (mem_rd_W),
+    .pc_plus_4_W (pc_plus_4_W),
+    .result_src_W (result_src_W),
+    .result_W (result_W)
+);
+    
 endmodule
