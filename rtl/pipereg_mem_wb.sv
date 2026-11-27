@@ -24,3 +24,4 @@ always_ff @(posedge clk) begin
 end
 
 endmodule
+//checked correct i/o against spec :)

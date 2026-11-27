@@ -3,7 +3,7 @@ module pipereg_fetch_decode (
     input logic [31:0]  instruction_F,
     input logic [31:0]  pc_F,
     input logic [31:0]  pc_plus_4_F,
-    input logic         stall,
+    input logic         stall, flush,
     output logic [31:0] instruction_D,
     output logic [31:0] pc_D,
     output logic [31:0] pc_plus_4_D
@@ -24,3 +24,5 @@ always_ff @(posedge clk) begin
 end
 
 endmodule
+
+//checked correct against spec :)

@@ -30,3 +30,5 @@ always_ff @(posedge clk) begin
 end
 
 endmodule
+
+//checked correct against the spec :)

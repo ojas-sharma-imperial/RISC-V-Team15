@@ -6,25 +6,36 @@ module top (
 
 // ---- HAZARD UNIT ----
 
+logic [1:0] forward1_E, forward2_E;
+logic stall, flush;
+
 hazard_unit hazard_unit_inst (
-    .rs1_E (),
-    .rs2_E (),
-    .rd_M (),
-    .rd_W (),
-    .reg_write_M (),
-    .reg_write_W (),
-    .forward1_E (),
-    .forward2_E (),
-    .rs1_D(),
-    .rs2_D(),
-    .rd_E(),
-    .result_src_E(),
-    .stall()
+    .rs1_E (rs1_E),
+    .rs2_E (rs2_E),
+    .rd_M (rd_M),
+    .rd_W (rd_W),
+    .reg_wen_M (reg_wen_M),
+    .reg_wen_W (reg_wen_W),
+    .forward1_E (forward1_E),
+    .forward2_E (forward2_E),
+    .rs1_D (rs1_D),
+    .rs2_D (rs2_D),
+    .rd_E (rd_E),
+    .result_src_E (result_src_E),
+    .stall (stall),
+    .pc_src_E (pc_src_E),
+    .flush (flush)
 );
 
 // ---- FETCH STAGE ----
 
 // main instantiations
+
+// define additional wires to next pipeline stage
+
+logic [31:0] instruction_F;
+logic [31:0] pc_F;
+logic [31:0] pc_plus_4_F;
 
 pc pc_inst (
     .clk(clk),
@@ -33,7 +44,7 @@ pc pc_inst (
     .pc_target(32'b0),
     .pc_plus_4 (pc_plus_4_F),
     .pc_output(pc_F),
-    .stall()
+    .stall(stall)
 );
 
 rom #(.ADDRESS_WIDTH(12)) rom_inst (
@@ -49,15 +60,9 @@ pipereg_fetch_decode pipereg_fetch_decode_inst (
     .instruction_D (instruction_D), // DECODE SIDE
     .pc_D (pc_D),
     .pc_plus_4_D (pc_plus_4_D),
-    .stall()
+    .stall(stall),
+    .flush(flush)
 );
-
-// define additional wires to next pipeline stage
-
-logic [31:0] instruction_F;
-logic [31:0] pc_F;
-logic [31:0] pc_plus_4_F;
-
 // ---- DECODE STAGE ----
 
 // define wires from previous pipeline stage
@@ -91,7 +96,8 @@ control control_inst (
     .alu_control (alu_control_D),
     .mem_wen (mem_wen_D),
     .reg_wen (reg_wen_D),
-    .branch (branch_D),
+    .branch_D (branch_D),
+    .jump_D (jump_D),
     .rst (rst)
 );
 
@@ -128,6 +134,7 @@ logic [2:0] alu_control_D;
 logic mem_wen_D;
 logic reg_wen_D;
 logic branch_D;
+logic jump_D;
 
 pipereg_decode_execute pipereg_decode_execute_inst (
     .clk (clk),
@@ -148,6 +155,7 @@ pipereg_decode_execute pipereg_decode_execute_inst (
     .mem_wen_D (mem_wen_D),
     .reg_wen_D (reg_wen_D),
     .branch_D (branch_D),
+    .jump_D (jump_D),
     .rd1_E (rd1_E), // EXECUTE SIDE
     .rd2_E (rd2_E),
     .pc_E (pc_E),
@@ -165,7 +173,8 @@ pipereg_decode_execute pipereg_decode_execute_inst (
     .mem_wen_E (mem_wen_E),
     .reg_wen_E (reg_wen_E),
     .branch_E (branch_E),
-    .stall()
+    .stall(stall),
+    .flush(flush)
 );
 
 // ---- EXECUTE STAGE ----
@@ -196,13 +205,14 @@ logic branch_E;
 
 alu alu_inst (
     .alu_src_2 (alu_src_2_E),
-    .branch (branch_E),
+    .branch_E (branch_E),
+    .jump_E (),
     .alu_op1 (),
     .alu_op2 (),
     .alu_control (alu_control_E),
     .funct7 (),
     .alu_out (alu_out_E),
-    .zero ()
+    .pc_src_E (pc_src_E)
 );
 
 // define additional wires to next pipeline stage
@@ -216,6 +226,7 @@ pipereg_execute_mem pipereg_execute_mem_inst (
     .mem_wd_E (mem_wd_E),
     .rd_E (rd_E),
     .pc_plus_4_E (pc_plus_4_E),
+    .funct3_E (funct3_E),
     .reg_wen_E (reg_wen_E),
     .mem_wen_E (mem_wen_E),
     .result_src_E (result_src_E),
@@ -223,6 +234,7 @@ pipereg_execute_mem pipereg_execute_mem_inst (
     .mem_wd_M (mem_wd_M),
     .rd_M (rd_M),
     .pc_plus_4_M (pc_plus_4_M),
+    .funct3_M (funct3_M),
     .reg_wen_M (reg_wen_M),
     .mem_wen_M (mem_wen_M),
     .result_src_M (result_src_M)
@@ -239,6 +251,7 @@ logic [31:0] pc_plus_4_M;
 logic reg_wen_M;
 logic mem_wen_M;
 logic [1:0] result_src_M;
+logic [2:0] funct3_M;
 
 // main instantiations
 

@@ -14,9 +14,9 @@ module hazard_unit(
     input  logic [4:0] rs1_E, //connect to a1
     input  logic [4:0] rs2_E, //connect to a2
     input  logic [4:0] rd_M, //connect to a3
-    input  logic [4:0] rs_W, //connect to a3
-    input  logic       reg_write_M,
-    input  logic       reg_write_W,
+    input  logic [4:0] rd_W, //connect to a3
+    input  logic       reg_wen_M,
+    input  logic       reg_wen_W,
     output logic [1:0] forward1_E,
     output logic [1:0] forward2_E,
     //data hazard stalling
@@ -31,16 +31,16 @@ module hazard_unit(
 always_comb begin : data_hazard_forwarding
     forward1_E = 2'b00;
     forward2_E = 2'b00;
-    if (reg_write_M) begin
+    if (reg_wen_M) begin
         if ((rd_M == rs1_E) && (rs1_E != '0))
             forward1_E = 2'b10;
         if ((rd_M == rs2_E) && (rs2_E != '0))
             forward2_E = 2'b10;
     end
-    if (reg_write_W) begin
-        if ((rs_W == rs1_E) && (forward1_E != 2'b10) && (rs1_E != '0))
+    if (reg_wen_W) begin
+        if ((rd_W == rs1_E) && (forward1_E != 2'b10) && (rs1_E != '0))
             forward1_E = 2'b01;
-        if ((rs_W == rs2_E) && (forward2_E != 2'b10) && (rs2_E != '0))
+        if ((rd_W == rs2_E) && (forward2_E != 2'b10) && (rs2_E != '0))
             forward2_E = 2'b01;
     end
     
