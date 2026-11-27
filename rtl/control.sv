@@ -10,7 +10,8 @@ module control (
     output logic [2:0]  alu_control,
     output logic        mem_wen,
     output logic        reg_wen,
-    output logic        branch
+    output logic        branch_D,
+    output logic        jump_D
 );
 
 // instruction types
@@ -60,7 +61,8 @@ always_comb begin
     alu_control = 3'b0;
     mem_wen = 1'b0;
     reg_wen = 1'b0;
-    branch = 1'b0;
+    branch_D = 1'b0;
+    jump_D = 1'b0;
 
     case (instruction)
         LUI: begin
@@ -82,6 +84,7 @@ always_comb begin
             imm_src = J;
             result_src = 2'b10;
             reg_wen = 1'b1;
+            jump_D = 1;
         end
         // JALR jumps to rs1 + immediate (bit 0 cleared in top) and saves PC + 4.
         JALR: begin
@@ -91,11 +94,12 @@ always_comb begin
             alu_control = ADD_SUB;
             result_src = 2'b10;
             reg_wen = 1'b1;
+            jump_D = 1;
         end
         // Taken branches use the PC-relative target; untaken branches use PC + 4.
         BRANCH: begin
             imm_src = B;
-            branch = 1'b1;
+            branch_D = 1'b1;
             case (funct3)
                 3'b000:     begin // BEQ
                     alu_control = ADD_SUB;

@@ -1,18 +1,21 @@
 module alu (
     input  logic        alu_src_2,
-    input  logic        branch,
+    input  logic        branch_E,
+    input  logic        jump_E,
     input  logic [31:0] alu_op1,
     input  logic [31:0] alu_op2,
     input  logic [2:0]  alu_control,
     input  logic [6:0]  funct7,
     output logic [31:0] alu_out,
-    output logic        zero
+    output logic        pc_src_E
 );
+
+logic zero;
 
 always_comb begin
     case (alu_control)
         0:  begin // ADD/SUB
-            if (branch) begin // branch instructions must always subtract
+            if (branch_E) begin // branch_E instructions must always subtract
                 alu_out = alu_op1 - alu_op2;
             end else if (alu_src_2) begin // imm-reg
                 alu_out = alu_op1 + alu_op2; // ADDI
@@ -40,6 +43,10 @@ always_comb begin
         default: alu_out = 32'b0;
     endcase
     zero = (alu_out == 32'b0);
+    if ((zero && branch_E) | jump_E)
+        pc_src_E = 1;
+    else pc_src_E = 0;
+
 end
 
 endmodule

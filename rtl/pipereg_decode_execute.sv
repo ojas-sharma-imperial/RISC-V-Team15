@@ -1,4 +1,4 @@
-module pipereg_decode_execute (
+module pipeW_decode_execute (
     input logic         clk,
     input logic [31:0]  rd1_D, // data INPUT signals
     input logic [31:0]  rd2_D,
@@ -15,7 +15,7 @@ module pipereg_decode_execute (
     input logic         alu_src_2_D,
     input logic [2:0]   alu_control_D,
     input logic         mem_wen_D,
-    input logic         reg_wen_D,
+    input logic         W_wen_D,
     input logic         branch_D,
     input logic         stall, flush,
     output logic [31:0] rd1_E, // data OUTPUT signals
@@ -33,88 +33,50 @@ module pipereg_decode_execute (
     output logic        alu_src_2_E,
     output logic [2:0]  alu_control_E,
     output logic        mem_wen_E,
-    output logic        reg_wen_E,
+    output logic        W_wen_E,
     output logic        branch_E
 );
 
-logic [31:0] rd1_reg;
-logic [31:0] rd2_reg;
-logic [31:0] pc_reg;
-logic [4:0] rs1_reg;
-logic [4:0] rs2_reg;
-logic [4:0] rd_reg;
-logic [31:0] ext_imm_reg;
-logic [31:0] pc_plus_4_reg;
-logic [2:0] funct3_reg;
-logic [6:0] funct7_reg;
-logic [1:0] result_src_reg;
-logic [1:0] alu_src_1_reg;
-logic alu_src_2_reg;
-logic [2:0] alu_control_reg;
-logic mem_wen_reg;
-logic reg_wen_reg;
-logic branch_reg;
-
-always_comb begin
-    rd1_E = rd1_reg;
-    rd2_E = rd2_reg;
-    pc_E = pc_reg;
-    rs1_E = rs1_reg;
-    rs2_E = rs2_reg;
-    rd_E = rd_reg;
-    ext_imm_E = ext_imm_reg;
-    pc_plus_4_E = pc_plus_4_reg;
-    funct3_E = funct3_reg;
-    funct7_E = funct7_reg;
-    result_src_E = result_src_reg;
-    alu_src_1_E = alu_src_1_reg;
-    alu_src_2_E = alu_src_2_reg;
-    alu_control_E = alu_control_reg;
-    mem_wen_E = mem_wen_reg;
-    reg_wen_E = reg_wen_reg;
-    branch_E = branch_reg;
-end
-
 always_ff @(posedge clk) begin
     if (stall | flush) begin
-        rd1_reg <= '0;
-        rd2_reg <= '0;
-        pc_reg <= '0;
-        rs1_reg <= '0;
-        rs2_reg <= '0;
-        rd_reg <= '0;
-        ext_imm_reg <= '0;
-        pc_plus_4_reg <= '0;
-        funct3_reg <= '0;
-        funct7_reg <= '0;
-        pc_src_reg <= '0;
-        result_src_reg <= '0;
-        alu_src_1_reg <= '0;
-        alu_src_2_reg <= '0;
-        alu_control_reg <= '0;
-        mem_wen_reg <= '0;
-        reg_wen_reg <= '0;
-        branch_reg <= '0;        
+        rd1_W <= '0;
+        rd2_W <= '0;
+        pc_W <= '0;
+        rs1_W <= '0;
+        rs2_W <= '0;
+        rd_W <= '0;
+        ext_imm_W <= '0;
+        pc_plus_4_W <= '0;
+        funct3_W <= '0;
+        funct7_W <= '0;
+        pc_src_W <= '0;
+        result_src_W <= '0;
+        alu_src_1_W <= '0;
+        alu_src_2_W <= '0;
+        alu_control_W <= '0;
+        mem_wen_W <= '0;
+        W_wen_W <= '0;
+        branch_W <= '0;        
     end
     else begin
-        rd1_reg <= rd1_D;
-        rd2_reg <= rd2_D;
-        pc_reg <= pc_D;
-        rs1_reg <= rs1_D;
-        rs2_reg <= rs2_D;
-        rd_reg <= rd_D;
-        ext_imm_reg <= ext_imm_D;
-        pc_plus_4_reg <= pc_plus_4_D;
-        funct3_reg <= funct3_D;
-        funct7_reg <= funct7_D;
-        pc_src_reg <= pc_src_D;
-        result_src_reg <= result_src_D;
-        alu_src_1_reg <= alu_src_1_D;
-        alu_src_2_reg <= alu_src_2_D;
-        alu_control_reg <= alu_control_D;
-        mem_wen_reg <= mem_wen_D;
-        reg_wen_reg <= reg_wen_D;
-        branch_reg <= branch_D;        
+        rd1_W <= rd1_D;
+        rd2_W <= rd2_D;
+        pc_W <= pc_D;
+        rs1_W <= rs1_D;
+        rs2_W <= rs2_D;
+        rd_W <= rd_D;
+        ext_imm_W <= ext_imm_D;
+        pc_plus_4_W <= pc_plus_4_D;
+        funct3_W <= funct3_D;
+        funct7_W <= funct7_D;
+        pc_src_W <= pc_src_D;
+        result_src_W <= result_src_D;
+        alu_src_1_W <= alu_src_1_D;
+        alu_src_2_W <= alu_src_2_D;
+        alu_control_W <= alu_control_D;
+        mem_wen_W <= mem_wen_D;
+        W_wen_W <= W_wen_D;
+        branch_W <= branch_D;        
     end
 end
 
