@@ -27,8 +27,8 @@ module pipereg_decode_execute (
     output logic [4:0]  rd_E,
     output logic [31:0] ext_imm_E,
     output logic [31:0] pc_plus_4_E,
-    output logic [2:0]   funct3_E,
-    output logic [6:0]   funct7_E,
+    output logic [2:0]  funct3_E,
+    output logic [6:0]  funct7_E,
     output logic [1:0]  result_src_E,
     output logic [1:0]  alu_src_1_E,
     output logic        alu_src_2_E,
@@ -84,5 +84,5 @@ end
 
 endmodule
 
-//inputs and outputs look good, just gotta check why we have two ALU sources :)
+//inputs and outputs look good, just gotta check why we have two ALU sources :) update: i read the control spec 
 //func3 and func7 as i/o deviate from the spec but are fully correct and necessary to step beyond the spec

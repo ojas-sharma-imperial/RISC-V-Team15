@@ -5,14 +5,34 @@ module alu (
     input  logic [31:0] alu_op1,
     input  logic [31:0] alu_op2,
     input  logic [2:0]  alu_control,
+    input  logic [1:0]  forward1_E, forward2_E,
+    input  logic [31:0] forward_m_op, forward_w_op,
     input  logic [6:0]  funct7,
+    input  logic [31:0] ext_imm_E,
     output logic [31:0] alu_out,
-    output logic        pc_src_E
+    output logic        pc_src_E,
+    output logic [31:0] mem_wd_E
 );
 
 logic zero;
 
 always_comb begin
+    case(forward1_E)
+        2'b00: alu_op1 = alu_op1;
+        2'b01: alu_op1 = forward_w_op;
+        2'b10: alu_op1 = forward_m_op;
+    endcase
+    case(forward2_E)
+        2'b00: alu_op2 = alu_op2;
+        2'b01: alu_op2 = forward_w_op;
+        2'b10: alu_op2 = forward_m_op;
+    endcase
+
+    mem_wd_E = alu_op2;
+
+    if(alu_src_2)
+        alu_op2 = ext_imm_E;
+
     case (alu_control)
         0:  begin // ADD/SUB
             if (branch_E) begin // branch_E instructions must always subtract

@@ -28,14 +28,10 @@ always_comb begin
     end
 end
 
-always_ff @(posedge clk) begin
+always_ff @(negedge clk) begin
     if ((a3 != 0) && (a3_wen)) begin
         regs[a3] <= wd3;
     end
-end
-
-always_ff @(negedge clk) begin
-    //writeback
 end
 
 endmodule

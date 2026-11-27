@@ -200,19 +200,26 @@ logic [2:0] alu_control_E;
 logic mem_wen_E;
 logic reg_wen_E;
 logic branch_E;
+logic jump_E;
 
 // main instantiations
 
 alu alu_inst (
     .alu_src_2 (alu_src_2_E),
     .branch_E (branch_E),
-    .jump_E (),
+    .jump_E (jump_E),
     .alu_op1 (),
     .alu_op2 (),
     .alu_control (alu_control_E),
-    .funct7 (),
+    .funct7_E (funct7_E),
     .alu_out (alu_out_E),
-    .pc_src_E (pc_src_E)
+    .pc_src_E (pc_src_E),
+    .forward1_E(forward1_E),
+    .forward2_E(forward2_E),
+    .forward_w_op(result_W),
+    .forward_m_op(alu_out_M),
+    .ext_imm_E(ext_imm_E),
+    .mem_wd_E(mem_wd_E)
 );
 
 // define additional wires to next pipeline stage
